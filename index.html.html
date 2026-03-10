@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLI-Steel: Real-Time Industrial Accountability Platform (RIAP) | Ministry of Steel, GoI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0d2b4e;
+    --navy-mid: #1a4270;
+    --navy-light: #2358a0;
+    --steel: #4a6580;
+    --steel-light: #8fa5b8;
+    --steel-pale: #d4e0eb;
+    --saffron: #e8751a;
+    --saffron-light: #f5a041;
+    --green: #1a7a3c;
+    --green-light: #28a855;
+    --green-pale: #d4edda;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --yellow: #d4910a;
+    --yellow-light: #f0b429;
+    --bg: #f0f4f8;
+    --bg-card: #ffffff;
+    --border: #c8d8e8;
+    --text-primary: #0d2b4e;
+    --text-secondary: #4a6580;
+    --text-muted: #8fa5b8;
+    --shadow: 0 2px 8px rgba(13,43,78,0.10);
+    --shadow-md: 0 4px 16px rgba(13,43,78,0.13);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  .gov-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 0;
+    border-bottom: 4px solid var(--saffron);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    gap: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .ashoka-emblem {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+
+  .header-identity {
+    flex: 1;
+  }
+
+  .gov-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--saffron-light);
+    margin-bottom: 2px;
+  }
+
+  .platform-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    line-height: 1.2;
+  }
+
+  .platform-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #4cdd82;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #4cdd82;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .header-btn {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.18); }
+
+  .datetime-block {
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.70);
+    line-height: 1.7;
+  }
+
+  .datetime-block .date { font-size: 11px; color: #fff; font-weight: 500; }
+
+  /* ── NAV BAR ─────────────────────────────────────────── */
+  .nav-bar {
+    background: var(--navy-mid);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-bar::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { color: #fff; border-bottom-color: rgba(255,255,255,0.3); }
+  .nav-tab.active { color: var(--saffron-light); border-bottom-color: var(--saffron); }
+
+  /* ── LAYOUT ──────────────────────────────────────────── */
+  .dashboard-body {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+  }
+
+  .section-block {
+    margin-bottom: 28px;
+  }
+
+  /* ── TAB PANEL SYSTEM ────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeInTab 0.25s ease; }
+  @keyframes fadeInTab { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--steel-pale);
+  }
+
+  .section-header .sec-icon {
+    width: 32px; height: 32px;
+    background: var(--navy);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+
+  .section-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  /* ── CARDS ───────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  /* ── KPI GRID ────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+  .kpi-card:hover { box-shadow: var(--shadow-md); }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--navy);
+  }
+
+  .kpi-card.accent-saffron::before { background: var(--saffron); }
+  .kpi-card.accent-green::before { background: var(--green); }
+  .kpi-card.accent-steel::before { background: var(--steel); }
+
+  .kpi-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .kpi-icon {
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .kpi-icon.bg-navy { background: rgba(13,43,78,0.08); }
+  .kpi-icon.bg-saffron { background: rgba(232,117,26,0.10); }
+  .kpi-icon.bg-green { background: rgba(26,122,60,0.10); }
+  .kpi-icon.bg-steel { background: rgba(74,101,128,0.10); }
+
+  .kpi-trend {
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 7px;
+    border-radius: 3px;
+  }
+  .kpi-trend.up { background: rgba(26,122,60,0.10); color: var(--green); }
+  .kpi-trend.down { background: rgba(192,57,43,0.10); color: var(--red); }
+  .kpi-trend.neutral { background: rgba(74,101,128,0.10); color: var(--steel); }
+
+  .kpi-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .progress-bar-wrap {
+    margin-top: 10px;
+  }
+  .progress-bar-track {
+    height: 5px;
+    background: var(--steel-pale);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--navy);
+    transition: width 1s ease;
+  }
+  .progress-bar-fill.saffron { background: var(--saffron); }
+  .progress-bar-fill.green { background: var(--green); }
+
+  /* ── TWO/THREE COL GRID ─────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+
+  /* ── TABLE ───────────────────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .data-table thead th {
+    background: var(--navy);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    white-space: nowrap;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .data-table tbody tr:hover { background: rgba(13,43,78,0.03); }
+  .data-table tbody td {
+    padding: 9px 12px;
+    color: var(--text-primary);
+    vertical-align: middle;
+    border-right: 1px solid var(--border);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .status-pill.green { background: rgba(26,122,60,0.12); color: var(--green); }
+  .status-pill.yellow { background: rgba(212,145,10,0.12); color: var(--yellow); }
+  .status-pill.red { background: rgba(192,57,43,0.12); color: var(--red); }
+
+  .traffic-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .traffic-dot.green { background: var(--green-light); }
+  .traffic-dot.yellow { background: var(--yellow-light); }
+  .traffic-dot.red { background: var(--red-light); }
+
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--steel);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-select {
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .filter-select:focus { outline: none; border-color: var(--navy-light); }
+
+  /* ── PLANT CARDS ─────────────────────────────────────── */
+  .plant-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: box-shadow 0.18s, transform 0.18s;
+    position: relative;
+    outline: none;
+  }
+  .plant-card:hover, .plant-card:focus {
+    box-shadow: 0 6px 24px rgba(13,43,78,0.16);
+    transform: translateY(-2px);
+  }
+  .plant-card.hidden { display: none !important; }
+
+  .pc-status-bar { height: 4px; }
+  .pc-status-bar.green  { background: var(--green-light); }
+  .pc-status-bar.yellow { background: var(--yellow-light); }
+  .pc-status-bar.red    { background: var(--red-light); }
+
+  .pc-top { padding: 14px 14px 0; }
+
+  .pc-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    gap: 8px;
+  }
+
+  .pc-plant-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
+
+  .pc-company {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .pc-location {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .pc-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pc-stat {
+    background: var(--bg-card);
+    padding: 10px 12px;
+    transition: background 0.12s;
+  }
+  .plant-card:hover .pc-stat { background: rgba(13,43,78,0.018); }
+
+  .pc-stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+
+  .pc-stat-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .pc-unit {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .pc-stat-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  .pc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: rgba(13,43,78,0.028);
+    font-size: 11px;
+  }
+
+  .pc-risk { font-weight: 600; }
+  .pc-risk.low      { color: var(--green); }
+  .pc-risk.moderate { color: var(--yellow); }
+  .pc-risk.high     { color: var(--red); }
+  .pc-incentive     { color: var(--text-secondary); }
+
+  .pc-click-hint {
+    text-align: right;
+    padding: 5px 14px 8px;
+    font-size: 10px;
+    color: var(--navy-light);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .plant-card:hover .pc-click-hint { opacity: 1; }
+
+  /* ── PLANT POPUP ─────────────────────────────────────── */
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,43,78,0.50);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+  .popup-overlay.open { display: flex; }
+
+  .plant-popup {
+    background: #fff;
+    border-radius: 8px;
+    width: 680px;
+    max-width: 95vw;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .popup-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .popup-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .popup-body { padding: 20px; }
+
+  .popup-section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--navy);
+    margin: 16px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .popup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .popup-kpi {
+    background: var(--bg);
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+  .popup-kpi .pk-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .popup-kpi .pk-value { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--navy); }
+
+  .progress-labeled {
+    margin-bottom: 10px;
+  }
+  .progress-labeled .pl-top { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+  .progress-labeled .pl-label { color: var(--text-secondary); font-weight: 500; }
+  .progress-labeled .pl-pct { font-weight: 700; color: var(--navy); font-family: 'Roboto Mono', monospace; }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .tier-base { border-color: var(--steel-light); color: var(--steel); background: rgba(74,101,128,0.08); }
+  .tier-1 { border-color: var(--saffron); color: var(--saffron); background: rgba(232,117,26,0.08); }
+  .tier-2 { border-color: var(--green); color: var(--green); background: rgba(26,122,60,0.08); }
+
+  /* ── CHART WRAPPERS ──────────────────────────────────── */
+  .chart-wrap {
+    padding: 16px;
+    position: relative;
+    height: 260px;
+  }
+  .chart-wrap canvas { position: absolute; inset: 16px; }
+
+  .chart-header {
+    padding: 12px 16px 0;
+  }
+
+  /* ── RISK ENGINE ─────────────────────────────────────── */
+  .risk-score-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--steel-pale);
+    overflow: hidden;
+    margin-top: 3px;
+  }
+  .risk-score-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s;
+  }
+  .risk-score-fill.low { background: var(--green-light); }
+  .risk-score-fill.moderate { background: var(--yellow-light); }
+  .risk-score-fill.high { background: var(--red-light); }
+
+  .alert-card {
+    border-left: 4px solid;
+    border-radius: 0 4px 4px 0;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .alert-card.sev-high { border-left-color: var(--red); }
+  .alert-card.sev-med { border-left-color: var(--yellow); }
+  .alert-card.sev-low { border-left-color: var(--green); }
+
+  .alert-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 5px; }
+  .alert-title { font-weight: 700; font-size: 12px; color: var(--navy); }
+  .alert-severity {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .alert-severity.high { background: rgba(192,57,43,0.12); color: var(--red); }
+  .alert-severity.medium { background: rgba(212,145,10,0.12); color: var(--yellow); }
+  .alert-severity.low { background: rgba(26,122,60,0.12); color: var(--green); }
+  .alert-body { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+  .alert-action { font-size: 11px; color: var(--navy-light); font-weight: 600; margin-top: 4px; }
+
+  /* ── ROI SECTION ─────────────────────────────────────── */
+  .roi-highlight {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: #fff;
+    border-radius: 6px;
+    padding: 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .roi-highlight::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .roi-highlight::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -20px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: rgba(232,117,26,0.10);
+  }
+
+  .roi-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 8px;
+  }
+
+  .roi-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--saffron-light);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .roi-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* ── GAUGE ───────────────────────────────────────────── */
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .gauge-svg { width: 200px; height: 120px; }
+
+  .gauge-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .gauge-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+  }
+
+  /* ── GLOBAL BENCHMARK ────────────────────────────────── */
+  .benchmark-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: var(--bg);
+  }
+  .benchmark-country {
+    font-weight: 700;
+    font-size: 12px;
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .benchmark-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--steel-pale);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .benchmark-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s ease;
+  }
+  .benchmark-pct {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── INSIGHT PILL ────────────────────────────────────── */
+  .insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .insight-text { color: var(--text-primary); }
+  .insight-meta { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  .gov-footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.65);
+    padding: 20px 24px;
+    margin-top: 32px;
+    font-size: 11px;
+  }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .footer-sources h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--saffron-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .footer-sources ul { list-style: none; }
+  .footer-sources li { margin-bottom: 3px; }
+  .footer-sources li::before { content: '▸ '; color: var(--saffron); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+  }
+  .india-flag-strip {
+    display: flex;
+    height: 4px;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .flag-saffron { flex: 1; background: var(--saffron); }
+  .flag-white { flex: 1; background: #fff; }
+  .flag-green { flex: 1; background: var(--green); }
+
+  /* ── UTILITIES ───────────────────────────────────────── */
+  .text-muted { color: var(--text-muted); }
+  .text-navy { color: var(--navy); }
+  .font-mono { font-family: 'Roboto Mono', monospace; }
+  .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+  .fw-700 { font-weight: 700; }
+  .small { font-size: 11px; }
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .p-16 { padding: 16px; }
+  .p-12 { padding: 12px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(13,43,78,0.08);
+    color: var(--navy);
+    margin-left: 6px;
+  }
+
+  .comp-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+  }
+  .comp-indicator.green { background: var(--green-pale); color: var(--green); }
+  .comp-indicator.yellow { background: rgba(212,145,10,0.10); color: var(--yellow); }
+  .comp-indicator.red { background: rgba(192,57,43,0.10); color: var(--red); }
+  .comp-label { font-weight: 600; }
+  .comp-status { margin-left: auto; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .corridor-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    padding: 10px 14px;
+    background: rgba(13,43,78,0.05);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .corridor-node {
+    background: var(--navy);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .corridor-arrow { color: var(--saffron); font-size: 16px; }
+
+  .infra-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .infra-kpi {
+    text-align: center;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .infra-kpi .ik-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .infra-kpi .ik-unit { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .infra-kpi .ik-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* animated numbers */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-value { animation: countUp 0.6s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ════════════════════════════════════════════════════════════ -->
+<header class="gov-header">
+  <div class="header-top">
+    <!-- Ashoka Emblem SVG -->
+    <svg class="ashoka-emblem" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="28" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <circle cx="30" cy="26" r="12" fill="none" stroke="#f5a041" stroke-width="1.5"/>
+      <!-- Chakra spokes -->
+      <g stroke="#f5a041" stroke-width="1" opacity="0.9">
+        <line x1="30" y1="14" x2="30" y2="38"/>
+        <line x1="18" y1="26" x2="42" y2="26"/>
+        <line x1="21.5" y1="17.5" x2="38.5" y2="34.5"/>
+        <line x1="38.5" y1="17.5" x2="21.5" y2="34.5"/>
+        <line x1="19.1" y1="22" x2="40.9" y2="30"/>
+        <line x1="19.1" y1="30" x2="40.9" y2="22"/>
+        <line x1="22" y1="19.1" x2="38" y2="32.9"/>
+        <line x1="38" y1="19.1" x2="22" y2="32.9"/>
+      </g>
+      <circle cx="30" cy="26" r="2.5" fill="#f5a041"/>
+      <!-- Lions base -->
+      <rect x="22" y="39" width="16" height="3" rx="1" fill="#f5a041" opacity="0.9"/>
+      <!-- Lion silhouettes (simplified) -->
+      <ellipse cx="24" cy="38" rx="3" ry="2" fill="#f5a041" opacity="0.85"/>
+      <ellipse cx="36" cy="38" rx="3" ry="2" fill="#f5a041" opacity="0.85"/>
+      <circle cx="23.5" cy="36.5" r="1.5" fill="#f5a041" opacity="0.85"/>
+      <circle cx="36.5" cy="36.5" r="1.5" fill="#f5a041" opacity="0.85"/>
+      <!-- Devanagari-style text -->
+      <text x="30" y="53" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="5.5" font-family="Noto Sans" font-weight="500">सत्यमेव जयते</text>
+    </svg>
+
+    <div class="header-identity">
+      <div class="gov-label">Ministry of Steel &nbsp;|&nbsp; Government of India &nbsp;|&nbsp; PLI Monitoring Cell</div>
+      <div class="platform-title">PLI-Steel: Real-Time Industrial Accountability Platform (RIAP)</div>
+      <div class="platform-subtitle">Monitoring India's Specialty Steel Production Linked Incentive Scheme &nbsp;·&nbsp; From Subsidy to Sustainability</div>
+    </div>
+
+    <div class="header-controls">
+      <div class="live-indicator"><div class="live-dot"></div>LIVE</div>
+      <div class="header-btn" title="Notifications">🔔</div>
+      <div class="header-btn" title="Admin Login">👤</div>
+      <div class="datetime-block">
+        <div class="date" id="clock-date"></div>
+        <div id="clock-time"></div>
+        <div>IST &nbsp;·&nbsp; UTC+5:30</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav-bar">
+    <div class="nav-tab active" data-tab="home">Home</div>
+    <div class="nav-tab" data-tab="plants">Plant Performance</div>
+    <div class="nav-tab" data-tab="msme">MSME Integration</div>
+    <div class="nav-tab" data-tab="funds">Fund Disbursement</div>
+    <div class="nav-tab" data-tab="logistics">Logistics &amp; Infrastructure</div>
+    <div class="nav-tab" data-tab="risk">Risk Monitoring</div>
+    <div class="nav-tab" data-tab="analytics">Policy Analytics</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+</header>
+
+<!-- ═══ DASHBOARD BODY ═════════════════════════════════════════════════════ -->
+<div class="dashboard-body">
+
+  <!-- ══ TAB: HOME ══════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" data-panel="home">
+
+  <!-- ── SECTION 1: NATIONAL OVERVIEW KPI ─────────────────────────────── -->
+  <div class="section-block tab-visible" id="sec-overview" data-tabs="home">
+    <div class="section-header">
+      <div class="sec-icon">📊</div>
+      <div>
+        <div class="section-title">PLI Scheme – Specialty Steel Performance Overview</div>
+      </div>
+      <span class="section-subtitle">Data as of: <strong id="last-update">10 Mar 2026, 14:32 IST</strong></span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card accent-saffron">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-saffron">💰</div>
+          <span class="kpi-trend neutral">— Approved</span>
+        </div>
+        <div class="kpi-value">₹6,322 Cr</div>
+        <div class="kpi-label">Total PLI Outlay</div>
+        <div class="kpi-sub">Specialty Steel Scheme – FY2023–2028</div>
+      </div>
+
+      <div class="kpi-card accent-green">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-green">📤</div>
+          <span class="kpi-trend up">↑ 12%</span>
+        </div>
+        <div class="kpi-value">₹2,847 Cr</div>
+        <div class="kpi-label">Funds Disbursed</div>
+        <div class="kpi-sub">45.0% of total allocation utilised</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill green" style="width:45%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-navy">🏭</div>
+          <span class="kpi-trend up">↑ 3</span>
+        </div>
+        <div class="kpi-value">30</div>
+        <div class="kpi-label">Approved Firms</div>
+        <div class="kpi-sub">67 applications across product categories</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-steel">📋</div>
+          <span class="kpi-trend up">↑ 5</span>
+        </div>
+        <div class="kpi-value">67</div>
+        <div class="kpi-label">Approved Applications</div>
+        <div class="kpi-sub">Across 5 product line categories</div>
+      </div>
+
+      <div class="kpi-card accent-green">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-green">📈</div>
+          <span class="kpi-trend up">↑ 18%</span>
+        </div>
+        <div class="kpi-value">₹42,840 Cr</div>
+        <div class="kpi-label">Private Investment Realised</div>
+        <div class="kpi-sub">6.78× investment multiplier vs PLI outlay</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-saffron">⚙️</div>
+          <span class="kpi-trend up">↑ 8%</span>
+        </div>
+        <div class="kpi-value">4.2 MT</div>
+        <div class="kpi-label">Incremental Specialty Steel Prod.</div>
+        <div class="kpi-sub">FY2025–26 cumulative production</div>
+      </div>
+
+      <div class="kpi-card accent-saffron">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-saffron">👷</div>
+          <span class="kpi-trend up">↑ 22%</span>
+        </div>
+        <div class="kpi-value">68,400</div>
+        <div class="kpi-label">Jobs Created</div>
+        <div class="kpi-sub">Direct + indirect employment generated</div>
+      </div>
+
+      <div class="kpi-card accent-green">
+        <div class="kpi-top">
+          <div class="kpi-icon bg-green">💹</div>
+          <span class="kpi-trend up">↑ 14%</span>
+        </div>
+        <div class="kpi-value">₹1,18,200 Cr</div>
+        <div class="kpi-label">Total Incremental Sales</div>
+        <div class="kpi-sub">Cumulative sales since scheme inception</div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-panel home -->
+
+  <!-- ══ TAB: PLANT PERFORMANCE ════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="plants">
+
+  <!-- ── SECTION 2: PLANT PERFORMANCE TABLE ──────────────────────────── -->
+  <div class="section-block" id="sec-plants" data-tabs="plants">
+    <div class="section-header">
+      <div class="sec-icon">🏭</div>
+      <div class="section-title">Plant-Level Performance Monitoring</div>
+      <span class="section-subtitle">Updated: Real-Time ERP Feed</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        Steel Plant Performance Tracker
+        <span class="tag">67 Applications</span>
+        <span class="tag">30 Firms</span>
+      </div>
+
+      <div class="p-12">
+        <div class="filter-bar">
+          <span class="filter-label">Filter:</span>
+          <select class="filter-select">
+            <option>All States</option>
+            <option>Odisha</option>
+            <option>Karnataka</option>
+            <option>Jharkhand</option>
+            <option>Gujarat</option>
+            <option>West Bengal</option>
+          </select>
+          <select class="filter-select">
+            <option>All Companies</option>
+            <option>Tata Steel</option>
+            <option>JSW Steel</option>
+            <option>SAIL</option>
+            <option>AMNS India</option>
+            <option>JSPL</option>
+          </select>
+          <select class="filter-select">
+            <option>All Status</option>
+            <option>On Track</option>
+            <option>Moderate Risk</option>
+            <option>Underperforming</option>
+          </select>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Plant Name</th>
+                <th>Company</th>
+                <th>State</th>
+                <th>Prod. Target</th>
+                <th>Prod. Achieved</th>
+                <th>DVA %</th>
+                <th>MSME Share</th>
+                <th>CapEx Comm.</th>
+                <th>CapEx Achieved</th>
+                <th>PLI Milestone</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Kalinganagar</strong></td>
+                <td>Tata Steel</td>
+                <td>Odisha</td>
+                <td>1.8 MT</td>
+                <td>1.75 MT <span style="font-size:10px;color:var(--green)">(97%)</span></td>
+                <td><span style="color:var(--green);font-weight:700">28.4%</span></td>
+                <td>26.2%</td>
+                <td>₹3,800 Cr</td>
+                <td>₹3,640 Cr</td>
+                <td><span class="status-pill green"><span class="traffic-dot green"></span>On Track</span></td>
+              </tr>
+              <tr>
+                <td><strong>Vijayanagar</strong></td>
+                <td>JSW Steel</td>
+                <td>Karnataka</td>
+                <td>2.2 MT</td>
+                <td>1.92 MT <span style="font-size:10px;color:var(--yellow)">(87%)</span></td>
+                <td><span style="color:var(--yellow);font-weight:700">22.1%</span></td>
+                <td>13.8%</td>
+                <td>₹4,200 Cr</td>
+                <td>₹3,150 Cr</td>
+                <td><span class="status-pill yellow"><span class="traffic-dot yellow"></span>Moderate Risk</span></td>
+              </tr>
+              <tr>
+                <td><strong>Rourkela</strong></td>
+                <td>SAIL</td>
+                <td>Odisha</td>
+                <td>1.4 MT</td>
+                <td>1.31 MT <span style="font-size:10px;color:var(--green)">(93%)</span></td>
+                <td><span style="color:var(--green);font-weight:700">26.8%</span></td>
+                <td>22.4%</td>
+                <td>₹2,600 Cr</td>
+                <td>₹2,470 Cr</td>
+                <td><span class="status-pill green"><span class="traffic-dot green"></span>On Track</span></td>
+              </tr>
+              <tr>
+                <td><strong>Hazira</strong></td>
+                <td>AMNS India</td>
+                <td>Gujarat</td>
+                <td>1.6 MT</td>
+                <td>1.12 MT <span style="font-size:10px;color:var(--red)">(70%)</span></td>
+                <td><span style="color:var(--red);font-weight:700">18.3%</span></td>
+                <td>11.2%</td>
+                <td>₹2,200 Cr</td>
+                <td>₹1,430 Cr</td>
+                <td><span class="status-pill red"><span class="traffic-dot red"></span>Underperforming</span></td>
+              </tr>
+              <tr>
+                <td><strong>Angul</strong></td>
+                <td>JSPL</td>
+                <td>Odisha</td>
+                <td>1.2 MT</td>
+                <td>1.15 MT <span style="font-size:10px;color:var(--green)">(95%)</span></td>
+                <td><span style="color:var(--green);font-weight:700">27.5%</span></td>
+                <td>24.1%</td>
+                <td>₹2,000 Cr</td>
+                <td>₹1,900 Cr</td>
+                <td><span class="status-pill green"><span class="traffic-dot green"></span>On Track</span></td>
+              </tr>
+              <tr>
+                <td><strong>Bhilai</strong></td>
+                <td>SAIL</td>
+                <td>Chhattisgarh</td>
+                <td>1.1 MT</td>
+                <td>0.88 MT <span style="font-size:10px;color:var(--yellow)">(80%)</span></td>
+                <td><span style="color:var(--yellow);font-weight:700">21.4%</span></td>
+                <td>17.6%</td>
+                <td>₹1,800 Cr</td>
+                <td>₹1,260 Cr</td>
+                <td><span class="status-pill yellow"><span class="traffic-dot yellow"></span>Moderate Risk</span></td>
+              </tr>
+              <tr>
+                <td><strong>Dolvi Works</strong></td>
+                <td>JSW Steel</td>
+                <td>Maharashtra</td>
+                <td>0.9 MT</td>
+                <td>0.63 MT <span style="font-size:10px;color:var(--red)">(70%)</span></td>
+                <td><span style="color:var(--red);font-weight:700">17.8%</span></td>
+                <td>10.5%</td>
+                <td>₹1,600 Cr</td>
+                <td>₹960 Cr</td>
+                <td><span class="status-pill red"><span class="traffic-dot red"></span>Underperforming</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: GEOSPATIAL MAP ─────────────────────────────────────── -->
+  <!-- ── SECTION 3: PLANT CARDS ──────────────────────────────────────────── -->
+  <div class="section-block" id="sec-map" data-tabs="plants">
+    <div class="section-header">
+      <div class="sec-icon">🏭</div>
+      <div class="section-title">Steel Plant Performance Cards</div>
+      <span class="section-subtitle">Click any card to view full KPI detail</span>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar" style="margin-bottom:16px">
+      <span class="filter-label">Filter:</span>
+      <select class="filter-select" id="card-filter-state" onchange="filterCards()">
+        <option value="">All States</option>
+        <option value="Odisha">Odisha</option>
+        <option value="Karnataka">Karnataka</option>
+        <option value="Gujarat">Gujarat</option>
+        <option value="Maharashtra">Maharashtra</option>
+        <option value="Chhattisgarh">Chhattisgarh</option>
+      </select>
+      <select class="filter-select" id="card-filter-status" onchange="filterCards()">
+        <option value="">All Status</option>
+        <option value="green">On Track</option>
+        <option value="yellow">Moderate Risk</option>
+        <option value="red">Underperforming</option>
+      </select>
+      <span id="card-count" style="margin-left:auto;font-size:11px;color:var(--text-muted)">Showing 7 plants</span>
+    </div>
+
+    <div id="plant-card-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;">
+
+      <!-- ── Tata Steel Kalinganagar ── -->
+      <div class="plant-card" data-state="Odisha" data-status="green" onclick="openPopup('kalinganagar')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar green"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Kalinganagar</div>
+              <div class="pc-company">Tata Steel Limited</div>
+            </div>
+            <span class="status-pill green"><span class="traffic-dot green"></span>On Track</span>
+          </div>
+          <div class="pc-location">📍 Odisha &nbsp;·&nbsp; App ID: PLI-SS-2023-OD-0042</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">1.75 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 1.80 MT · <span style="color:var(--green)">97%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">28.4<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--green)">✓ Met</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹3,640<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹3,800 Cr · <span style="color:var(--green)">96%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">26.2<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Tier II · <span style="color:var(--green)">✓ Above 25%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk low">Risk Score: <strong>18</strong> — Low</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹328 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── JSW Steel Vijayanagar ── -->
+      <div class="plant-card" data-state="Karnataka" data-status="yellow" onclick="openPopup('vijayanagar')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar yellow"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Vijayanagar</div>
+              <div class="pc-company">JSW Steel Limited</div>
+            </div>
+            <span class="status-pill yellow"><span class="traffic-dot yellow"></span>Moderate Risk</span>
+          </div>
+          <div class="pc-location">📍 Karnataka &nbsp;·&nbsp; App ID: PLI-SS-2023-KA-0018</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">1.92 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 2.20 MT · <span style="color:var(--yellow)">87%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">22.1<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--yellow)">⚠ 3% gap</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹3,150<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹4,200 Cr · <span style="color:var(--yellow)">75%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">13.8<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Base Tier · <span style="color:var(--red)">Below 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk moderate">Risk Score: <strong>58</strong> — Moderate</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹280 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── SAIL Rourkela ── -->
+      <div class="plant-card" data-state="Odisha" data-status="green" onclick="openPopup('rourkela')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar green"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Rourkela</div>
+              <div class="pc-company">SAIL – Steel Authority of India</div>
+            </div>
+            <span class="status-pill green"><span class="traffic-dot green"></span>On Track</span>
+          </div>
+          <div class="pc-location">📍 Odisha &nbsp;·&nbsp; App ID: PLI-SS-2023-OD-0031</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">1.31 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 1.40 MT · <span style="color:var(--green)">93%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">26.8<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--green)">✓ Met</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹2,470<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹2,600 Cr · <span style="color:var(--green)">95%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">22.4<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Tier I · <span style="color:var(--green)">✓ Above 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk low">Risk Score: <strong>22</strong> — Low</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹215 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── AMNS India Hazira ── -->
+      <div class="plant-card" data-state="Gujarat" data-status="red" onclick="openPopup('hazira')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar red"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Hazira</div>
+              <div class="pc-company">ArcelorMittal Nippon Steel India</div>
+            </div>
+            <span class="status-pill red"><span class="traffic-dot red"></span>Underperforming</span>
+          </div>
+          <div class="pc-location">📍 Gujarat &nbsp;·&nbsp; App ID: PLI-SS-2023-GJ-0007</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">1.12 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 1.60 MT · <span style="color:var(--red)">70%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">18.3<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--red)">✗ 6.7% gap</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹1,430<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹2,200 Cr · <span style="color:var(--red)">65%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">11.2<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Base Tier · <span style="color:var(--red)">Below 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk high">Risk Score: <strong>74</strong> — High Risk</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹98 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── JSPL Angul ── -->
+      <div class="plant-card" data-state="Odisha" data-status="green" onclick="openPopup('angul')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar green"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Angul</div>
+              <div class="pc-company">Jindal Steel &amp; Power Ltd</div>
+            </div>
+            <span class="status-pill green"><span class="traffic-dot green"></span>On Track</span>
+          </div>
+          <div class="pc-location">📍 Odisha &nbsp;·&nbsp; App ID: PLI-SS-2023-OD-0055</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">1.15 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 1.20 MT · <span style="color:var(--green)">95%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">27.5<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--green)">✓ Met</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹1,900<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹2,000 Cr · <span style="color:var(--green)">95%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">24.1<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Tier I · <span style="color:var(--green)">✓ Above 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk low">Risk Score: <strong>15</strong> — Low</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹178 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── SAIL Bhilai ── -->
+      <div class="plant-card" data-state="Chhattisgarh" data-status="yellow" onclick="openPopup('bhilai')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar yellow"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Bhilai</div>
+              <div class="pc-company">SAIL – Steel Authority of India</div>
+            </div>
+            <span class="status-pill yellow"><span class="traffic-dot yellow"></span>Moderate Risk</span>
+          </div>
+          <div class="pc-location">📍 Chhattisgarh &nbsp;·&nbsp; App ID: PLI-SS-2023-CG-0014</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">0.88 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 1.10 MT · <span style="color:var(--yellow)">80%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">21.4<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--yellow)">⚠ 3.6% gap</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹1,260<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹1,800 Cr · <span style="color:var(--yellow)">70%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">17.6<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Tier I · <span style="color:var(--green)">✓ Above 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk moderate">Risk Score: <strong>42</strong> — Moderate</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹142 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+      <!-- ── JSW Steel Dolvi ── -->
+      <div class="plant-card" data-state="Maharashtra" data-status="red" onclick="openPopup('dolvi')" tabindex="0">
+        <div class="pc-top">
+          <div class="pc-status-bar red"></div>
+          <div class="pc-header">
+            <div>
+              <div class="pc-plant-name">Dolvi Works</div>
+              <div class="pc-company">JSW Steel Limited</div>
+            </div>
+            <span class="status-pill red"><span class="traffic-dot red"></span>Underperforming</span>
+          </div>
+          <div class="pc-location">📍 Maharashtra &nbsp;·&nbsp; App ID: PLI-SS-2023-MH-0022</div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-label">Production</div>
+            <div class="pc-stat-value">0.63 <span class="pc-unit">MT</span></div>
+            <div class="pc-stat-sub">Target: 0.90 MT · <span style="color:var(--red)">70%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">DVA</div>
+            <div class="pc-stat-value">17.8<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Target: 25% · <span style="color:var(--red)">✗ 7.2% gap</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">CapEx</div>
+            <div class="pc-stat-value">₹960<span class="pc-unit">Cr</span></div>
+            <div class="pc-stat-sub">of ₹1,600 Cr · <span style="color:var(--red)">60%</span></div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-label">MSME Share</div>
+            <div class="pc-stat-value">10.5<span class="pc-unit">%</span></div>
+            <div class="pc-stat-sub">Base Tier · <span style="color:var(--red)">Below 15%</span></div>
+          </div>
+        </div>
+        <div class="pc-footer">
+          <div class="pc-risk high">Risk Score: <strong>68</strong> — High Risk</div>
+          <div class="pc-incentive">PLI Disbursed: <strong>₹76 Cr</strong></div>
+        </div>
+        <div class="pc-click-hint">Click for full detail ›</div>
+      </div>
+
+    </div><!-- /plant-card-grid -->
+  </div><!-- /sec-map -->
+  </div><!-- /tab-panel plants -->
+
+  <!-- ══ TAB: MSME INTEGRATION ══════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="msme">
+
+  <!-- ── SECTION 4: MSME INTEGRATION ──────────────────────────────────── -->
+  <div class="section-block" id="sec-msme" data-tabs="msme">
+    <div class="section-header">
+      <div class="sec-icon">🔗</div>
+      <div class="section-title">Anchor-MSME Synergy Monitoring</div>
+      <span class="section-subtitle">Supply Chain Integration Dashboard</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">MSME Procurement Share by Anchor Firm</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="msmeBarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Incentive Tier Distribution</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="tierPieChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Regional MSME Supplier Clusters</div>
+        <div class="p-12">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">MSME supplier network by state cluster</div>
+          <div class="benchmark-row">
+            <span class="benchmark-country" style="font-size:11px">Odisha</span>
+            <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:72%;background:var(--green)"></div></div>
+            <span class="benchmark-pct" style="color:var(--green)">342</span>
+          </div>
+          <div class="benchmark-row">
+            <span class="benchmark-country" style="font-size:11px">Jharkhand</span>
+            <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:58%;background:var(--navy)"></div></div>
+            <span class="benchmark-pct">275</span>
+          </div>
+          <div class="benchmark-row">
+            <span class="benchmark-country" style="font-size:11px">West Bengal</span>
+            <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:45%;background:var(--navy)"></div></div>
+            <span class="benchmark-pct">214</span>
+          </div>
+          <div class="benchmark-row">
+            <span class="benchmark-country" style="font-size:11px">Chhattisgarh</span>
+            <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:38%;background:var(--saffron)"></div></div>
+            <span class="benchmark-pct" style="color:var(--saffron)">180</span>
+          </div>
+          <div class="benchmark-row">
+            <span class="benchmark-country" style="font-size:11px">Maharashtra</span>
+            <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:30%;background:var(--saffron)"></div></div>
+            <span class="benchmark-pct" style="color:var(--saffron)">142</span>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">Total MSME Suppliers: <strong style="color:var(--navy)">1,153</strong> across 12 states</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-panel msme -->
+
+  <!-- ══ TAB: FUND DISBURSEMENT ════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="funds">
+
+  <!-- ── SECTION 5: FUND DISBURSEMENT ─────────────────────────────────── -->
+  <div class="section-block" id="sec-funds" data-tabs="funds">
+    <div class="section-header">
+      <div class="sec-icon">💸</div>
+      <div class="section-title">PLI Incentive Disbursement Tracker</div>
+      <span class="section-subtitle">Avg. disbursement time: <strong>30 days</strong></span>
+    </div>
+
+    <div class="grid-3-1">
+      <div class="card">
+        <div class="card-header">Monthly Disbursement Trend (₹ Crore)</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="disbursementChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Distribution by Company</div>
+        <div class="chart-wrap" style="height:200px">
+          <canvas id="companyPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-12" style="margin-top:14px">
+      <div class="card-header">PLI Milestone Compliance Status</div>
+      <div class="p-16">
+        <div class="grid-2" style="gap:16px">
+          <div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">Total Funds Released vs ₹6,322 Cr</span><span class="pl-pct">45%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill green" style="width:45%"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">Incremental Sales Milestone</span><span class="pl-pct">82%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill" style="width:82%;background:var(--navy)"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">CapEx Achievement Milestone</span><span class="pl-pct">78%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill saffron" style="width:78%"></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">Metallurgical Grade Compliance</span><span class="pl-pct">91%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill green" style="width:91%"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">Domestic Value Addition (DVA)</span><span class="pl-pct">68%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill" style="width:68%;background:var(--yellow)"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label">MSME Sourcing Threshold</span><span class="pl-pct">55%</span></div>
+              <div class="progress-bar-track" style="height:8px"><div class="progress-bar-fill" style="width:55%;background:var(--yellow)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-panel funds -->
+
+  <!-- ══ TAB: LOGISTICS ════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="logistics">
+
+  <!-- ── SECTION 6: CORRIDOR INFRASTRUCTURE ──────────────────────────── -->
+  <div class="section-block" id="sec-logistics" data-tabs="logistics">
+    <div class="section-header">
+      <div class="sec-icon">🚂</div>
+      <div class="section-title">Logistics & Infrastructure Monitoring</div>
+      <span class="section-subtitle">Eastern Steel Corridor</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Eastern Steel Corridor – Connectivity Monitoring</div>
+      <div class="p-16">
+        <div class="corridor-info">
+          <span class="corridor-node">Visakhapatnam Port</span>
+          <span class="corridor-arrow">⟶</span>
+          <span class="corridor-node">Rourkela / Angul</span>
+          <span class="corridor-arrow">⟶</span>
+          <span class="corridor-node">Kharagpur Jn.</span>
+          <span class="corridor-arrow">⟶</span>
+          <span class="corridor-node">Dankuni / Haldia</span>
+        </div>
+
+        <div class="grid-2" style="gap:14px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Infrastructure KPIs</div>
+            <div class="infra-kpi-row">
+              <div class="infra-kpi">
+                <div class="ik-val" style="color:var(--green)">18.4%</div>
+                <div class="ik-unit">reduction</div>
+                <div class="ik-label">Freight Cost</div>
+              </div>
+              <div class="infra-kpi">
+                <div class="ik-val" style="color:var(--green)">22%</div>
+                <div class="ik-unit">reduction</div>
+                <div class="ik-label">Transit Time</div>
+              </div>
+              <div class="infra-kpi">
+                <div class="ik-val">76%</div>
+                <div class="ik-unit">utilisation</div>
+                <div class="ik-label">Rail Freight</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Node Status</div>
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Visakhapatnam Port</span><span class="comp-status">Operational</span></div>
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Dedicated Freight Corridor</span><span class="comp-status">Active</span></div>
+            <div class="comp-indicator yellow"><span class="traffic-dot yellow"></span><span class="comp-label">Last Mile Rail Connectivity</span><span class="comp-status">In Progress</span></div>
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Haldia Port Interface</span><span class="comp-status">Operational</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-panel logistics -->
+
+  <!-- ══ TAB: RISK MONITORING ══════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="risk">
+
+  <!-- ── SECTION 7: RISK ENGINE ────────────────────────────────────────── -->
+  <div class="section-block" id="sec-risk" data-tabs="risk">
+    <div class="section-header">
+      <div class="sec-icon">⚠️</div>
+      <div class="section-title">PLI Performance Early Warning System</div>
+      <span class="section-subtitle">Risk Engine – Composite PLI Risk Index</span>
+    </div>
+
+    <div class="grid-3-1" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header">Risk Monitoring Table – Plant-Level PLI Risk Index</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Plant</th>
+                <th>Company</th>
+                <th>State</th>
+                <th>Risk Score</th>
+                <th>Category</th>
+                <th>Primary Risk</th>
+                <th>Policy Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Kalinganagar</strong></td>
+                <td>Tata Steel</td>
+                <td>Odisha</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--green)">18</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill low" style="width:18%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill green">Low Risk</span></td>
+                <td style="font-size:11px">Minor logistics delay</td>
+                <td style="font-size:11px;color:var(--navy-light)">Monitor — No action</td>
+              </tr>
+              <tr>
+                <td><strong>Vijayanagar</strong></td>
+                <td>JSW Steel</td>
+                <td>Karnataka</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--yellow)">58</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill moderate" style="width:58%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill yellow">Moderate</span></td>
+                <td style="font-size:11px">Low MSME sourcing</td>
+                <td style="font-size:11px;color:var(--saffron)">Supplier integration advisory</td>
+              </tr>
+              <tr>
+                <td><strong>Rourkela</strong></td>
+                <td>SAIL</td>
+                <td>Odisha</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--green)">22</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill low" style="width:22%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill green">Low Risk</span></td>
+                <td style="font-size:11px">DVA near threshold</td>
+                <td style="font-size:11px;color:var(--navy-light)">Quarterly DVA review</td>
+              </tr>
+              <tr>
+                <td><strong>Hazira</strong></td>
+                <td>AMNS India</td>
+                <td>Gujarat</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--red)">74</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill high" style="width:74%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill red">High Risk</span></td>
+                <td style="font-size:11px">CapEx delay + DVA gap</td>
+                <td style="font-size:11px;color:var(--red)">Ministerial review — Urgent</td>
+              </tr>
+              <tr>
+                <td><strong>Angul</strong></td>
+                <td>JSPL</td>
+                <td>Odisha</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--green)">15</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill low" style="width:15%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill green">Low Risk</span></td>
+                <td style="font-size:11px">On track</td>
+                <td style="font-size:11px;color:var(--navy-light)">Standard monitoring</td>
+              </tr>
+              <tr>
+                <td><strong>Dolvi Works</strong></td>
+                <td>JSW Steel</td>
+                <td>Maharashtra</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="font-mono fw-700" style="color:var(--red)">68</span>
+                    <div class="risk-score-bar" style="width:60px"><div class="risk-score-fill high" style="width:68%"></div></div>
+                  </div>
+                </td>
+                <td><span class="status-pill red">High Risk</span></td>
+                <td style="font-size:11px">Production shortfall</td>
+                <td style="font-size:11px;color:var(--red)">Show-cause notice</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-header">Risk Distribution</div>
+          <div class="chart-wrap" style="height:180px">
+            <canvas id="riskPieChart"></canvas>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <div class="card-header">Risk KPI Weights</div>
+          <div class="p-12">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Composite PLI Risk Index Formula</div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">Production vs Target</span><span class="pl-pct" style="font-size:10px">30%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:30%;background:var(--navy)"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">DVA Compliance</span><span class="pl-pct" style="font-size:10px">20%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:20%;background:var(--navy-light)"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">CapEx Progress</span><span class="pl-pct" style="font-size:10px">20%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill saffron" style="width:20%"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">MSME Sourcing Share</span><span class="pl-pct" style="font-size:10px">15%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill green" style="width:15%"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">Logistics Delays</span><span class="pl-pct" style="font-size:10px">10%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:10%;background:var(--yellow)"></div></div>
+            </div>
+            <div class="progress-labeled">
+              <div class="pl-top"><span class="pl-label" style="font-size:10px">Regulatory Delays</span><span class="pl-pct" style="font-size:10px">5%</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:5%;background:var(--steel)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policy Alerts -->
+    <div class="card">
+      <div class="card-header">🚨 Policy Action Alerts <span class="tag" style="background:rgba(192,57,43,0.12);color:var(--red)">3 High Severity</span></div>
+      <div class="p-12" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="alert-card sev-high">
+          <div class="alert-top">
+            <div class="alert-title">AMNS Hazira – DVA Threshold Breach Risk</div>
+            <span class="alert-severity high">HIGH</span>
+          </div>
+          <div class="alert-body">DVA at 18.3% against 25% target. CapEx behind schedule by ₹770 Cr. Dual compliance failure may lead to incentive clawback.</div>
+          <div class="alert-action">▶ Recommended: Immediate ministerial review + 90-day corrective action plan</div>
+        </div>
+
+        <div class="alert-card sev-high">
+          <div class="alert-top">
+            <div class="alert-title">JSW Dolvi – Production Below PLI Milestone</div>
+            <span class="alert-severity high">HIGH</span>
+          </div>
+          <div class="alert-body">Production achieved 70% of FY2026 target. CapEx slippage of 40%. MSME sourcing at 10.5%, below 15% minimum threshold.</div>
+          <div class="alert-action">▶ Recommended: Show-cause notice + MSME onboarding directive</div>
+        </div>
+
+        <div class="alert-card sev-med">
+          <div class="alert-top">
+            <div class="alert-title">JSW Vijayanagar – MSME Sourcing Below 15%</div>
+            <span class="alert-severity medium">MEDIUM</span>
+          </div>
+          <div class="alert-body">MSME procurement share at 13.8%, below the Synergy Tier I threshold of 15%. Risk of tier downgrade and reduced incentive rate.</div>
+          <div class="alert-action">▶ Recommended: Supplier integration advisory + cluster linkage support</div>
+        </div>
+
+        <div class="alert-card sev-low">
+          <div class="alert-top">
+            <div class="alert-title">SAIL Bhilai – Moderate CapEx Delay</div>
+            <span class="alert-severity low">LOW</span>
+          </div>
+          <div class="alert-body">CapEx at 70% of commitment. Production at 80% of target. No immediate risk to incentive disbursement but trend monitoring recommended.</div>
+          <div class="alert-action">▶ Recommended: Bi-monthly progress review with state nodal office</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-panel risk -->
+
+  <!-- ══ TAB: POLICY ANALYTICS ═════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="analytics">
+
+  <!-- ── SECTION 8: ROI CALCULATOR ────────────────────────────────────── -->
+  <div class="section-block" id="sec-roi" data-tabs="analytics">
+    <div class="section-header">
+      <div class="sec-icon">📐</div>
+      <div class="section-title">PLI Economic Impact & ROI Evaluation</div>
+      <span class="section-subtitle">Fiscal Sustainability Assessment</span>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="roi-highlight">
+        <div class="roi-label">Economic Return per ₹1 of PLI Incentive</div>
+        <div class="roi-value">₹6.2</div>
+        <div class="roi-desc">
+          (Private Investment + Export Revenue + Import Substitution Value) ÷ Total Incentives Disbursed
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:rgba(255,255,255,0.5);font-family:'Roboto Mono',monospace">
+          (₹42,840 + ₹8,420 + ₹13,800) Cr ÷ ₹10,490 Cr = 6.20×
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">ROI Impact KPIs</div>
+        <div class="p-12">
+          <div class="grid-2" style="gap:10px">
+            <div class="popup-kpi">
+              <div class="pk-label">Incentives Disbursed</div>
+              <div class="pk-value">₹2,847 Cr</div>
+            </div>
+            <div class="popup-kpi">
+              <div class="pk-label">Private Investment Leveraged</div>
+              <div class="pk-value">₹42,840 Cr</div>
+            </div>
+            <div class="popup-kpi">
+              <div class="pk-label">Investment Multiplier</div>
+              <div class="pk-value" style="color:var(--green)">6.78×</div>
+            </div>
+            <div class="popup-kpi">
+              <div class="pk-label">Import Substitution Value</div>
+              <div class="pk-value">₹13,800 Cr</div>
+            </div>
+            <div class="popup-kpi">
+              <div class="pk-label">Exports Generated</div>
+              <div class="pk-value">₹8,420 Cr</div>
+            </div>
+            <div class="popup-kpi">
+              <div class="pk-label">Jobs Created</div>
+              <div class="pk-value">68,400</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header">Investment Leverage: Govt vs Private</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="leverageChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Import Substitution Trend</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="importSubChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Specialty Steel Export Growth</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="exportChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fiscal Gauge + Post-PLI Competitiveness + Insights + Global Benchmark -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">PLI Fiscal Efficiency Score</div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 110">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#c0392b"/>
+                <stop offset="40%" style="stop-color:#d4910a"/>
+                <stop offset="75%" style="stop-color:#1a7a3c"/>
+                <stop offset="100%" style="stop-color:#1a7a3c"/>
+              </linearGradient>
+            </defs>
+            <!-- Track -->
+            <path d="M 15 95 A 85 85 0 0 1 185 95" fill="none" stroke="var(--steel-pale)" stroke-width="16" stroke-linecap="round"/>
+            <!-- Fill -->
+            <path d="M 15 95 A 85 85 0 0 1 185 95" fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round"
+                  stroke-dasharray="267" stroke-dashoffset="67"/>
+            <!-- Needle -->
+            <line x1="100" y1="95" x2="58" y2="28" stroke="var(--navy)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="100" cy="95" r="6" fill="var(--navy)"/>
+            <!-- Labels -->
+            <text x="15" y="108" font-size="8" fill="var(--red)" font-family="Noto Sans">Low</text>
+            <text x="82" y="22" font-size="8" fill="var(--yellow)" font-family="Noto Sans">Moderate</text>
+            <text x="166" y="108" font-size="8" fill="var(--green)" font-family="Noto Sans">High</text>
+          </svg>
+          <div class="gauge-value">74 / 100</div>
+          <div class="gauge-label">High Impact – Scheme Fiscally Sustainable</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card" style="flex:1">
+          <div class="card-header">Post-PLI Competitiveness Transition</div>
+          <div class="p-12">
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Domestic Value Addition Growth</span><span class="comp-status">On Track</span></div>
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Productivity Improvements</span><span class="comp-status">Positive</span></div>
+            <div class="comp-indicator yellow"><span class="traffic-dot yellow"></span><span class="comp-label">Export Competitiveness</span><span class="comp-status">Developing</span></div>
+            <div class="comp-indicator green"><span class="traffic-dot green"></span><span class="comp-label">Technology Adoption (EAF, DR)</span><span class="comp-status">On Track</span></div>
+            <div class="comp-indicator yellow"><span class="traffic-dot yellow"></span><span class="comp-label">MSME Integration Optimality</span><span class="comp-status">Below Optimal</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">🤖 Policy Insights Engine</div>
+          <div>
+            <div class="insight-item"><div class="insight-dot" style="background:var(--yellow)"></div><div><div class="insight-text">MSME integration below optimal level — 4 of 7 tracked plants below 15% threshold</div><div class="insight-meta">Risk: Incentive tier downgrade · Action: Cluster linkage programme</div></div></div>
+            <div class="insight-item"><div class="insight-dot" style="background:var(--green)"></div><div><div class="insight-text">Import substitution improving — specialty steel import share reduced by 12% YoY</div><div class="insight-meta">Positive trend · Continue monitoring</div></div></div>
+            <div class="insight-item"><div class="insight-dot" style="background:var(--yellow)"></div><div><div class="insight-text">Export competitiveness still developing — exports at ₹8,420 Cr vs ₹15,000 Cr target</div><div class="insight-meta">56% target achievement · FY2027 trajectory required</div></div></div>
+            <div class="insight-item"><div class="insight-dot" style="background:var(--green)"></div><div><div class="insight-text">CapEx investments on track for 78% of participating firms</div><div class="insight-meta">2 firms flagged for corrective action</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Benchmark -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-header">Global Benchmark – Manufacturing Share of GDP (%)</div>
+      <div class="p-16">
+        <div class="grid-2" style="gap:24px">
+          <div>
+            <div class="benchmark-row">
+              <span class="benchmark-country">India</span>
+              <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:54%;background:var(--saffron)"></div></div>
+              <span class="benchmark-pct" style="color:var(--saffron)">15%</span>
+            </div>
+            <div class="benchmark-row">
+              <span class="benchmark-country">China</span>
+              <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:100%;background:var(--navy)"></div></div>
+              <span class="benchmark-pct">28%</span>
+            </div>
+            <div class="benchmark-row">
+              <span class="benchmark-country">Vietnam</span>
+              <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:89%;background:var(--green)"></div></div>
+              <span class="benchmark-pct" style="color:var(--green)">25%</span>
+            </div>
+            <div class="benchmark-row">
+              <span class="benchmark-country">South Korea</span>
+              <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:82%;background:var(--steel)"></div></div>
+              <span class="benchmark-pct">23%</span>
+            </div>
+            <div class="benchmark-row">
+              <span class="benchmark-country">Germany</span>
+              <div class="benchmark-bar-track"><div class="benchmark-bar-fill" style="width:75%;background:var(--steel-light)"></div></div>
+              <span class="benchmark-pct">21%</span>
+            </div>
+          </div>
+          <div>
+            <div class="chart-wrap" style="height:180px;padding:8px">
+              <canvas id="benchmarkChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /tab-panel analytics -->
+
+  <!-- ══ TAB: REPORTS ══════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-panel="reports">
+    <div class="section-block">
+      <div class="section-header">
+        <div class="sec-icon">📄</div>
+        <div class="section-title">Scheme Reports & Downloads</div>
+        <span class="section-subtitle">Government of India – Ministry of Steel</span>
+      </div>
+      <div class="grid-3" style="margin-bottom:16px">
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">📊</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">Annual PLI Performance Report</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">FY 2025–26 Consolidated Report</div>
+          <span class="status-pill green">Available</span>
+        </div>
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">🏭</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">Plant-Wise Compliance Report</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">DVA & CapEx Milestone Tracker</div>
+          <span class="status-pill green">Available</span>
+        </div>
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">💸</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">Disbursement Audit Report</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Q4 FY 2025–26</div>
+          <span class="status-pill yellow">Pending</span>
+        </div>
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">🔗</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">MSME Integration Report</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Anchor-MSME Linkage Analysis</div>
+          <span class="status-pill green">Available</span>
+        </div>
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">⚠️</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">Risk Assessment Report</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Quarterly Early Warning Analysis</div>
+          <span class="status-pill green">Available</span>
+        </div>
+        <div class="card p-16" style="text-align:center;cursor:pointer">
+          <div style="font-size:32px;margin-bottom:10px">📐</div>
+          <div class="font-rajdhani fw-700" style="font-size:14px;color:var(--navy);margin-bottom:4px">ROI & Impact Assessment</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Economic Returns Evaluation</div>
+          <span class="status-pill yellow">In Review</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-panel reports -->
+
+</div><!-- /dashboard-body -->
+
+<!-- ═══ FOOTER ═══════════════════════════════════════════════════════════ -->
+<footer class="gov-footer">
+  <div class="footer-top">
+    <div class="footer-sources">
+      <h4>Data Sources</h4>
+      <ul>
+        <li>Ministry of Steel – PLI Monitoring Cell</li>
+        <li>DPIIT – PLI Scheme Performance Management System</li>
+        <li>Steel Plant ERP API Feeds (SAP Integration)</li>
+        <li>DGFT – Export Performance Data</li>
+        <li>MSME Procurement Registry – UDYAM Portal</li>
+      </ul>
+    </div>
+    <div>
+      <h4 style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--saffron-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Platform Information</h4>
+      <div style="font-size:11px;line-height:1.8">
+        <div>PLI-Steel: Real-Time Industrial Accountability Platform (RIAP)</div>
+        <div>Version 2.4.1 &nbsp;·&nbsp; Build March 2026</div>
+        <div style="margin-top:6px;color:rgba(255,255,255,0.45)">Data updated via real-time ERP integration from participating steel plants.</div>
+        <div style="color:rgba(255,255,255,0.45)">Refresh cycle: Every 4 hours &nbsp;·&nbsp; Critical alerts: Real-time</div>
+      </div>
+    </div>
+    <div>
+      <h4 style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--saffron-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Compliance</h4>
+      <div style="font-size:11px;line-height:1.8;color:rgba(255,255,255,0.65)">
+        <div>NIC Security Policy Compliant</div>
+        <div>GovCloud (MeitY) Hosted</div>
+        <div>CERT-In Audited</div>
+        <div>RTI Act 2005 Compliant</div>
+      </div>
+    </div>
+  </div>
+  <div class="india-flag-strip"><div class="flag-saffron"></div><div class="flag-white"></div><div class="flag-green"></div></div>
+  <div class="footer-bottom">
+    <div>© 2026 Ministry of Steel, Government of India. All Rights Reserved.</div>
+    <div class="footer-badge">
+      <span>🇮🇳 Digital India</span>
+      <span style="margin-left:12px">Make in India</span>
+      <span style="margin-left:12px">National Industrial Policy Monitoring</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ PLANT POPUP MODAL ══════════════════════════════════════════════════ -->
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="plant-popup" id="plantPopup">
+    <div class="popup-header">
+      <div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:3px">PLANT KPI DETAIL PANEL</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700" id="popupTitle">–</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px" id="popupMeta">–</div>
+      </div>
+      <button class="popup-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-body" id="popupBody">
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ─────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('clock-date').textContent =
+    days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  document.getElementById('clock-time').textContent =
+    now.toLocaleTimeString('en-IN', {hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── NAV TABS ──────────────────────────────────────────────────────────────
+function switchTab(tabName) {
+  // Update nav tabs
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tabName);
+  });
+  // Update panels
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.dataset.panel === tabName);
+  });
+}
+
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// Ensure home panel is shown on load
+switchTab('home');
+
+// ── PLANT CARD FILTER ─────────────────────────────────────────────────────
+function filterCards() {
+  const stateVal  = document.getElementById('card-filter-state').value;
+  const statusVal = document.getElementById('card-filter-status').value;
+  const cards = document.querySelectorAll('.plant-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const stateMatch  = !stateVal  || card.dataset.state  === stateVal;
+    const statusMatch = !statusVal || card.dataset.status === statusVal;
+    const show = stateMatch && statusMatch;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  const countEl = document.getElementById('card-count');
+  if (countEl) countEl.textContent = `Showing ${visible} plant${visible !== 1 ? 's' : ''}`;
+}
+
+// ── CHART DEFAULTS ────────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Noto Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#4a6580';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 12;
+
+const navyColor = '#0d2b4e';
+const saffronColor = '#e8751a';
+const greenColor = '#1a7a3c';
+const yellowColor = '#d4910a';
+const steelColor = '#4a6580';
+const redColor = '#c0392b';
+
+// ── MSME BAR CHART ────────────────────────────────────────────────────────
+new Chart(document.getElementById('msmeBarChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Tata\nKalinganagar','JSW\nVijayanagar','SAIL\nRourkela','AMNS\nHazira','JSPL\nAngul','SAIL\nBhilai','JSW\nDolvi'],
+    datasets: [{
+      label: 'MSME Procurement Share (%)',
+      data: [26.2, 13.8, 22.4, 11.2, 24.1, 17.6, 10.5],
+      backgroundColor: [greenColor,yellowColor,greenColor,redColor,greenColor,saffronColor,redColor],
+      borderRadius: 2,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% MSME share` } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+      y: {
+        max: 35,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { callback: v => v + '%' },
+        title: { display: true, text: 'MSME Share (%)', font: { size: 10 } }
+      }
+    }
+  }
+});
+
+// ── TIER PIE ───────────────────────────────────────────────────────────────
+new Chart(document.getElementById('tierPieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Base Tier (< 15%)', 'Synergy Tier I (15–25%)', 'Synergy Tier II (> 25%)'],
+    datasets: [{
+      data: [28, 42, 30],
+      backgroundColor: [steelColor, saffronColor, greenColor],
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}% of firms` } }
+    }
+  }
+});
+
+// ── DISBURSEMENT LINE ─────────────────────────────────────────────────────
+new Chart(document.getElementById('disbursementChart'), {
+  type: 'line',
+  data: {
+    labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+    datasets: [{
+      label: 'FY 2025-26 (₹ Cr)',
+      data: [180, 210, 245, 290, 320, 380, 410, 440, 390, 460, 490, 432],
+      borderColor: navyColor,
+      backgroundColor: 'rgba(13,43,78,0.07)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 3,
+      pointBackgroundColor: navyColor,
+    }, {
+      label: 'FY 2024-25 (₹ Cr)',
+      data: [120, 145, 180, 210, 240, 268, 300, 330, 310, 355, 380, 360],
+      borderColor: saffronColor,
+      backgroundColor: 'rgba(232,117,26,0.05)',
+      borderWidth: 1.5,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 2,
+      borderDash: [4, 4],
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '₹' + v } }
+    }
+  }
+});
+
+// ── COMPANY PIE ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('companyPieChart'), {
+  type: 'pie',
+  data: {
+    labels: ['Tata Steel','JSW Steel','SAIL','AMNS India','JSPL','Others'],
+    datasets: [{
+      data: [24, 28, 18, 12, 11, 7],
+      backgroundColor: [navyColor, saffronColor, greenColor, yellowColor, steelColor, '#8fa5b8'],
+      borderWidth: 2, borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 8 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
+    }
+  }
+});
+
+// ── RISK PIE ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('riskPieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Low Risk (0–30)', 'Moderate (31–60)', 'High Risk (61–100)'],
+    datasets: [{
+      data: [57, 29, 14],
+      backgroundColor: [greenColor, yellowColor, redColor],
+      borderWidth: 2, borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 6 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of plants` } }
+    }
+  }
+});
+
+// ── LEVERAGE CHART ──────────────────────────────────────────────────────────
+new Chart(document.getElementById('leverageChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY23', 'FY24', 'FY25', 'FY26 (P)'],
+    datasets: [{
+      label: 'Govt PLI Incentive (₹ Cr)',
+      data: [320, 680, 1420, 2847],
+      backgroundColor: saffronColor,
+      borderRadius: 2,
+    }, {
+      label: 'Private Investment (₹ Cr)',
+      data: [2200, 8500, 22400, 42840],
+      backgroundColor: navyColor,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { font: { size: 9 } } } },
+    scales: {
+      x: { grid: { display: false }, stacked: false },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '₹' + (v >= 1000 ? (v/1000)+'K' : v) } }
+    }
+  }
+});
+
+// ── IMPORT SUB ──────────────────────────────────────────────────────────────
+new Chart(document.getElementById('importSubChart'), {
+  type: 'line',
+  data: {
+    labels: ['FY22','FY23','FY24','FY25','FY26 (P)'],
+    datasets: [{
+      label: 'Import Substitution Value (₹ Cr)',
+      data: [2800, 4200, 7800, 11200, 13800],
+      borderColor: greenColor,
+      backgroundColor: 'rgba(26,122,60,0.08)',
+      borderWidth: 2, fill: true, tension: 0.4,
+      pointRadius: 4, pointBackgroundColor: greenColor,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '₹' + (v/1000).toFixed(0) + 'K' } }
+    }
+  }
+});
+
+// ── EXPORT CHART ─────────────────────────────────────────────────────────────
+new Chart(document.getElementById('exportChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY22','FY23','FY24','FY25','FY26 (P)'],
+    datasets: [{
+      label: 'Specialty Steel Exports (₹ Cr)',
+      data: [1200, 2100, 3800, 6100, 8420],
+      backgroundColor: [steelColor, steelColor, navyColor, navyColor, saffronColor],
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '₹' + (v/1000).toFixed(0) + 'K' } }
+    }
+  }
+});
+
+// ── BENCHMARK CHART ────────────────────────────────────────────────────────
+new Chart(document.getElementById('benchmarkChart'), {
+  type: 'bar',
+  data: {
+    labels: ['India', 'China', 'Vietnam', 'S. Korea', 'Germany'],
+    datasets: [{
+      label: 'Mfg. % of GDP',
+      data: [15, 28, 25, 23, 21],
+      backgroundColor: [saffronColor, navyColor, greenColor, steelColor, '#8fa5b8'],
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { max: 35, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── PLANT DATA ────────────────────────────────────────────────────────────────
+const plantData = {
+  kalinganagar: {
+    name: 'Kalinganagar Integrated Steel Plant',
+    company: 'Tata Steel Limited',
+    state: 'Odisha',
+    appId: 'PLI-SS-2023-OD-0042',
+    status: 'Fully Operational',
+    statusClass: 'green',
+    prodTarget: '1.80 MT', prodAchieved: '1.75 MT', prodPct: 97,
+    sales: '₹18,240 Cr',
+    dvaPct: 28.4, dvaTarget: 25,
+    capexTarget: '₹3,800 Cr', capexAchieved: '₹3,640 Cr', capexPct: 96,
+    msmePct: 26.2,
+    incentiveEarned: '₹342 Cr', incentiveDisbursed: '₹328 Cr',
+    milestoneClass: 'green', milestone: 'All Milestones Achieved',
+    msmeSup: 342, clusters: 8, tier: 'tier-2', tierLabel: 'Synergy Tier II',
+    riskScore: 18, riskClass: 'low',
+  },
+  vijayanagar: {
+    name: 'Vijayanagar Works',
+    company: 'JSW Steel Limited',
+    state: 'Karnataka',
+    appId: 'PLI-SS-2023-KA-0018',
+    status: 'Operational – Risk',
+    statusClass: 'yellow',
+    prodTarget: '2.20 MT', prodAchieved: '1.92 MT', prodPct: 87,
+    sales: '₹21,480 Cr',
+    dvaPct: 22.1, dvaTarget: 25,
+    capexTarget: '₹4,200 Cr', capexAchieved: '₹3,150 Cr', capexPct: 75,
+    msmePct: 13.8,
+    incentiveEarned: '₹312 Cr', incentiveDisbursed: '₹280 Cr',
+    milestoneClass: 'yellow', milestone: 'Milestone 2 Pending',
+    msmeSup: 185, clusters: 4, tier: 'tier-base', tierLabel: 'Base Tier',
+    riskScore: 58, riskClass: 'moderate',
+  },
+  rourkela: {
+    name: 'Rourkela Steel Plant',
+    company: 'SAIL (Steel Authority of India)',
+    state: 'Odisha',
+    appId: 'PLI-SS-2023-OD-0031',
+    status: 'Operational',
+    statusClass: 'green',
+    prodTarget: '1.40 MT', prodAchieved: '1.31 MT', prodPct: 93,
+    sales: '₹14,820 Cr',
+    dvaPct: 26.8, dvaTarget: 25,
+    capexTarget: '₹2,600 Cr', capexAchieved: '₹2,470 Cr', capexPct: 95,
+    msmePct: 22.4,
+    incentiveEarned: '₹228 Cr', incentiveDisbursed: '₹215 Cr',
+    milestoneClass: 'green', milestone: 'On Track',
+    msmeSup: 212, clusters: 6, tier: 'tier-1', tierLabel: 'Synergy Tier I',
+    riskScore: 22, riskClass: 'low',
+  },
+  hazira: {
+    name: 'Hazira Steel Complex',
+    company: 'ArcelorMittal Nippon Steel India',
+    state: 'Gujarat',
+    appId: 'PLI-SS-2023-GJ-0007',
+    status: 'Underperforming',
+    statusClass: 'red',
+    prodTarget: '1.60 MT', prodAchieved: '1.12 MT', prodPct: 70,
+    sales: '₹10,840 Cr',
+    dvaPct: 18.3, dvaTarget: 25,
+    capexTarget: '₹2,200 Cr', capexAchieved: '₹1,430 Cr', capexPct: 65,
+    msmePct: 11.2,
+    incentiveEarned: '₹144 Cr', incentiveDisbursed: '₹98 Cr',
+    milestoneClass: 'red', milestone: 'Under Ministerial Review',
+    msmeSup: 92, clusters: 2, tier: 'tier-base', tierLabel: 'Base Tier',
+    riskScore: 74, riskClass: 'high',
+  },
+  angul: {
+    name: 'Angul Steel Complex',
+    company: 'Jindal Steel & Power Ltd (JSPL)',
+    state: 'Odisha',
+    appId: 'PLI-SS-2023-OD-0055',
+    status: 'Operational',
+    statusClass: 'green',
+    prodTarget: '1.20 MT', prodAchieved: '1.15 MT', prodPct: 95,
+    sales: '₹12,140 Cr',
+    dvaPct: 27.5, dvaTarget: 25,
+    capexTarget: '₹2,000 Cr', capexAchieved: '₹1,900 Cr', capexPct: 95,
+    msmePct: 24.1,
+    incentiveEarned: '₹186 Cr', incentiveDisbursed: '₹178 Cr',
+    milestoneClass: 'green', milestone: 'All Milestones Achieved',
+    msmeSup: 244, clusters: 7, tier: 'tier-1', tierLabel: 'Synergy Tier I',
+    riskScore: 15, riskClass: 'low',
+  },
+};
+
+function openPopup(id) {
+  const d = plantData[id];
+  if (!d) return;
+  document.getElementById('popupTitle').textContent = d.name;
+  document.getElementById('popupMeta').textContent = d.company + '  ·  ' + d.state + '  ·  App ID: ' + d.appId;
+  document.getElementById('popupBody').innerHTML = buildPopup(d);
+  document.getElementById('popupOverlay').classList.add('open');
+}
+
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('open');
+}
+
+function progressBar(label, val, max, pct, color) {
+  return `<div class="progress-labeled">
+    <div class="pl-top"><span class="pl-label">${label}</span><span class="pl-pct" style="color:${color}">${pct}%</span></div>
+    <div class="progress-bar-track" style="height:7px"><div class="progress-bar-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px"><span>Target: ${max}</span><span>Achieved: ${val}</span></div>
+  </div>`;
+}
+
+function buildPopup(d) {
+  const statusColors = { green: 'var(--green)', yellow: 'var(--yellow)', red: 'var(--red)' };
+  const riskColors = { low: 'var(--green)', moderate: 'var(--yellow)', high: 'var(--red)' };
+  const riskLabels = { low: 'Low Risk', moderate: 'Moderate Risk', high: 'High Risk' };
+
+  return `
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <span class="status-pill ${d.statusClass}"><span class="traffic-dot ${d.statusClass}"></span>${d.status}</span>
+      <span style="font-size:11px;color:${riskColors[d.riskClass]};font-weight:700;background:rgba(0,0,0,0.05);padding:3px 8px;border-radius:3px">Risk Score: ${d.riskScore} – ${riskLabels[d.riskClass]}</span>
+    </div>
+
+    <div class="popup-section-title">Production & Sales Performance</div>
+    <div class="popup-grid">
+      <div class="popup-kpi"><div class="pk-label">Production Target</div><div class="pk-value">${d.prodTarget}</div></div>
+      <div class="popup-kpi"><div class="pk-label">Production Achieved</div><div class="pk-value" style="color:${statusColors[d.statusClass]}">${d.prodAchieved}</div></div>
+      <div class="popup-kpi"><div class="pk-label">Incremental Sales (PLI)</div><div class="pk-value">${d.sales}</div></div>
+      <div class="popup-kpi"><div class="pk-label">PLI Milestone Status</div><div class="pk-value" style="font-size:13px;color:${statusColors[d.milestoneClass]}">${d.milestone}</div></div>
+    </div>
+
+    <div class="popup-section-title">Key Compliance Metrics</div>
+    ${progressBar('Domestic Value Addition (DVA)', d.dvaPct + '%', d.dvaTarget + '% target', Math.round(d.dvaPct/d.dvaTarget*100), d.dvaPct >= d.dvaTarget ? 'var(--green)' : d.dvaPct >= 20 ? 'var(--yellow)' : 'var(--red)')}
+    ${progressBar('CapEx Achievement', d.capexAchieved, d.capexTarget, d.capexPct, d.capexPct >= 90 ? 'var(--green)' : d.capexPct >= 70 ? 'var(--saffron)' : 'var(--red)')}
+    ${progressBar('Production Achievement', d.prodAchieved, d.prodTarget, d.prodPct, d.prodPct >= 90 ? 'var(--green)' : d.prodPct >= 75 ? 'var(--yellow)' : 'var(--red)')}
+    ${progressBar('MSME Procurement Share', d.msmePct + '%', '25% target', Math.round(d.msmePct/25*100), d.msmePct >= 25 ? 'var(--green)' : d.msmePct >= 15 ? 'var(--saffron)' : 'var(--red)')}
+
+    <div class="popup-section-title">PLI Incentive Status</div>
+    <div class="popup-grid">
+      <div class="popup-kpi"><div class="pk-label">Incentive Earned</div><div class="pk-value">${d.incentiveEarned}</div></div>
+      <div class="popup-kpi"><div class="pk-label">Incentive Disbursed</div><div class="pk-value" style="color:var(--green)">${d.incentiveDisbursed}</div></div>
+    </div>
+
+    <div class="popup-section-title">MSME Supply Chain Linkages</div>
+    <div class="popup-grid" style="margin-bottom:10px">
+      <div class="popup-kpi"><div class="pk-label">MSME Suppliers</div><div class="pk-value">${d.msmeSup}</div></div>
+      <div class="popup-kpi"><div class="pk-label">Regional Clusters</div><div class="pk-value">${d.clusters}</div></div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Incentive Tier Classification:</div>
+      <span class="tier-badge ${d.tier}">⬟ ${d.tierLabel}</span>
+    </div>
+    <div style="font-size:10px;color:var(--text-muted);padding:8px;background:var(--bg);border-radius:4px">
+      <strong>Tier Criteria:</strong> Base Tier (&lt;15% MSME) · Synergy Tier I (15–25% MSME) · Synergy Tier II (&gt;25% MSME)
+    </div>
+  `;
+}
+
+</script>
+</body>
+</html>
