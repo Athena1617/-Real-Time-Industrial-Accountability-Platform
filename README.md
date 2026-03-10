@@ -1,1 +1,0 @@
-# -Real-Time-Industrial-Accountability-Platform
